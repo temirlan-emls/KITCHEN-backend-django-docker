@@ -1,3 +1,4 @@
+from turtle import title
 from django_better_admin_arrayfield.models.fields import ArrayField
 from io import BytesIO
 from PIL import Image
@@ -56,13 +57,17 @@ class Product(models.Model):
     code = models.CharField('Product Code (optional)', max_length = 50, blank=True)
     price = models.IntegerField()
     description = models.TextField('Product Description (optional)', blank=True)
-    properties = ArrayField(models.CharField(max_length=100, blank=True, default=''), default=list)
-    image = models.ImageField('Product Image',upload_to='products_images')
+    dimensions = models.CharField('Product Dimensions (Габариты)', max_length = 50, blank=True, default='')
+    consumption = models.CharField('Product Consumption (Потребление)', max_length = 20, blank=True, default='')
+    properties = ArrayField(models.CharField(max_length=100, blank=True, default=''), size=10,default=list)
+    title_image = models.ImageField('Product Title Image',upload_to='products_images')
+    image = models.ImageField('Second Product Image (optional)',upload_to='products_images', blank=True)
+    image2 = models.ImageField('Third Product Image (optional)',upload_to='products_images', blank=True)
     review = models.URLField('Product Review (optional)', max_length = 500, default='', blank=True)
     thumbnail = models.ImageField('Thumbnail', upload_to='products_images',  blank=True)
     isActive = models.BooleanField('Is Product Present (optional)', blank=True)
     data_added = models.DateTimeField(auto_now_add=True)
-    sub_category = models.ForeignKey(SubCategory, related_name='products', on_delete=models.CASCADE)
+    sub_category = models.ForeignKey(SubCategory,related_name='products', on_delete=models.CASCADE)
 
     
     def __str__(self):
@@ -78,27 +83,27 @@ class Product(models.Model):
 
     def get_thumbnail(self):
         if self.thumbnail:
-            return self.thumbnail.url
+            pass
         else:
-            if self.image:
-                self.thumbnail = self.make_thumbnail(self.image)
+            if self.title_image:
+                self.thumbnail = self.make_thumbnail(self.title_image)
                 self.save()
 
-                return self.thumbnail.url
+                return None
             else:
-                return ''
+                return None
         
 
-    def make_thumbnail(self, image, size=(300, 200)):
-        img = Image.open(image)
+    def make_thumbnail(self, title_image, size=(300, 200)):
+        img = Image.open(title_image)
         img.convert('RGB')
         img.thumbnail(size)
 
         thumb_io = BytesIO()
         img.save(thumb_io, 'JPEG', quality=85)
 
-        thumbnail = File(thumb_io, name=image.name)
+        thumbnail = File(thumb_io, name=title_image.name)
         return thumbnail
 
     class Meta:
-        ordering = ('-data_added',)
+        ordering = ('data_added',)

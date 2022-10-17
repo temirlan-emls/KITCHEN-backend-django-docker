@@ -1,3 +1,4 @@
+from unicodedata import category
 from django.db.models import Q
 from django.http import Http404
 
@@ -12,7 +13,7 @@ from rest_framework.decorators import api_view
 class LatestProductsList(APIView):
     def get(self, request, format=None):
         products = Product.objects.all()[0:4]
-        serializer = ProductSerializer(products, many=True)
+        serializer = ProductSerializer(products, many=True, context={"request": request})
         return Response(serializer.data)
 
 
@@ -28,7 +29,7 @@ class ProductDetail(APIView):
         subcategory = SubCategory.objects.filter(slug=sub_category_slug).values_list('category_id', flat=True)[0]
         if category == subcategory:
             product = self.get_object(sub_category_slug,product_slug)
-            serializer = ProductSerializer(product)
+            serializer = ProductSerializer(product, context={"request": request})
             return Response(serializer.data)
         else:
             raise Http404
@@ -44,7 +45,7 @@ class SubCategoryDetails(APIView):
 
     def get(self, request, category_slug,  sub_category_slug, format=None):
         sub_category = self.get_object(category_slug, sub_category_slug)
-        serializer = SubCategorySerializer(sub_category)
+        serializer = SubCategorySerializer(sub_category, context={"request": request})
         return Response(serializer.data)
 
 
@@ -57,14 +58,14 @@ class CategoryDetails(APIView):
 
     def get(self, request, category_slug, format=None):
         category = self.get_object(category_slug)
-        serializer = CategorySerializer(category)
+        serializer = CategorySerializer(category, context={"request": request})
         return Response(serializer.data)
 
 
 class GetCategory(APIView):
     def get(self, request, format=None):
         categories = Category.objects.all()
-        serializer = CategoriesSerializer(categories, many=True)
+        serializer = CategoriesSerializer(categories, many=True, context={"request": request})
         return Response(serializer.data)
 
 class GetSubCategory(APIView):
@@ -77,7 +78,7 @@ class GetSubCategory(APIView):
 
     def get(self, request, category_slug, format=None):
         sub_category = self.get_object(category_slug)
-        serializer = SubCategoriesSerializer(sub_category, many=True)
+        serializer = SubCategoriesSerializer(sub_category, many=True, context={"request": request})
         return Response(serializer.data)
 
 @api_view(['POST'])
@@ -85,8 +86,10 @@ def search(request):
     query = request.data.get('query', '')
 
     if query:
-        product = Product.objects.filter(Q(name__icontains=query) | Q(description__icontains=query))
-        serializer = ProductSerializer(product, many=True)
+        product = Product.objects.filter(Q(name__icontains=query) | Q(description__icontains=query) | Q(slug__icontains=query))
+
+
+        serializer = ProductSerializer(product, many=True, context={"request": request})
         return Response(serializer.data)
     else:
         return Response({'products': []})

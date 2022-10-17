@@ -19,7 +19,16 @@ from django.templatetags.static import static
 @api_view(['POST'])
 def XLSXGen(request):
     query = request.data.get('XLSXdata', '')
-    arr = query.split(", ")
+    arr = query.split(",")
+    res = {}
+    for item in arr:
+        res[item] = arr.count(item)
+    
+    print(res)
+
+    for id,item in  enumerate(res):
+        print(id, item, res[item])
+    
     if query:
         output = io.BytesIO()
         workbook = xlsxwriter.Workbook(output)
@@ -27,7 +36,6 @@ def XLSXGen(request):
 
         logo_url = static('catalog/logo.png')
         logo_url_data = BytesIO(urlopen(f'http://127.0.0.1:8000/{logo_url}').read())
-        print(logo_url_data)
         first_merge_format = workbook.add_format({'border': 1, 'bottom_color': 'red'})
         worksheet.merge_range('A1:J1', "", first_merge_format)
         worksheet.set_row(0, 100)
@@ -58,31 +66,61 @@ def XLSXGen(request):
         worksheet.write( 3, 5, 'Габариты, мм.')
         worksheet.write( 3, 6, 'Кол.')
         worksheet.write( 3, 7, 'Цена тг/шт.')
-        worksheet.write( 3, 8, 'Итог тг/шт.')
+        worksheet.write( 3, 8, 'Итог')
         worksheet.write( 3, 9, 'Сроки')   
 
 
-        for id,item in  enumerate(arr):
-
-         
-
+        for id,item in  enumerate(res):
             id = id + 4
             product = Product.objects.filter(Q(slug__icontains=item) | Q(name__icontains=item)).values()
-            url = product.values_list('image', flat = True)[0]
-            name = product.values_list('name',flat = True)[0]
-            image_data = BytesIO(urlopen(f'http://127.0.0.1:8000/media/{url}').read())
-
+           
             number_format = workbook.add_format({'valign': 'vcenter', 'align': 'center',})
             worksheet.write( id, 0, f'{id-3}', number_format)
             worksheet.set_column(0,0, 3)
 
-            worksheet.insert_image(id, 1,'image name', {'image_data': image_data, 'x_scale': 0.1, 'y_scale': 0.1, 'x_offset': 50, 'y_offset': 20})
-            worksheet.set_column(1,1, 28)
+             # IMAGE
+            url = product.values_list('title_image', flat = True)[0]
+            image_data = BytesIO(urlopen(f'http://127.0.0.1:8000/media/{url}').read())
+            worksheet.insert_image(id, 1,'image name', {'image_data': image_data, 'x_scale': 0.1, 'y_scale': 0.1, 'x_offset': 10, 'y_offset': 10})
+            worksheet.set_column(1,1, 30)
             worksheet.set_row(id, 100)
 
+            # NAME
+            worksheet.set_column(2,2, 28)
+            name = product.values_list('name',flat = True)[0]
             worksheet.write(id, 2, f'{name}')
-            
-            worksheet.write(id, 3, f'{name}')
+
+            worksheet.set_column(3,3, 35)
+
+            # CONSUMPTION
+            worksheet.set_column(4,4, 5)
+            kwt = product.values_list('consumption',flat = True)[0]
+            worksheet.write(id, 4, f'{kwt}')
+
+
+            # SIZE
+            worksheet.set_column(5,5, 20)
+            size = product.values_list('dimensions',flat = True)[0]
+            worksheet.write(id, 5, f'{size}')
+
+            # COUNT
+            worksheet.set_column(6,6, 5)
+            count = res[item]
+            worksheet.write(id, 6, count)
+
+
+            # PRICE
+            worksheet.set_column(7,7, 20)
+            price = product.values_list('price',flat = True)[0]
+            worksheet.write(id, 7, price)
+
+            # PRICE SUM
+            worksheet.set_column(8,8, 20)
+            sum = price*res[item]
+            worksheet.write(id, 8, sum)
+
+            worksheet.set_column(9,9, 20)
+
 
         workbook.close()
         output.seek(0)
@@ -92,7 +130,7 @@ def XLSXGen(request):
             output,
             content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         )
-        response['Content-Disposition'] = 'attachment; filename=%s' % filename
+        response['Content-Disposition'] = f'attachment; filename={filename}'
 
         return response
     else:
