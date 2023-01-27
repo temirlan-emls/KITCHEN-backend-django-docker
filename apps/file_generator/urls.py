@@ -1,4 +1,5 @@
-from django.urls import path 
+from django.urls import path
+
 from apps.file_generator import views
 
 urlpatterns = [

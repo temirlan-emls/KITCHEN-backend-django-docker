@@ -9,6 +9,4 @@ urlpatterns = [
     path('products/<slug:category_slug>/', views.CategoryDetails.as_view()),
     path('products/<slug:category_slug>/<slug:sub_category_slug>/', views.SubCategoryDetails.as_view()),
     path('product/<slug:category_slug>/<slug:sub_category_slug>/<slug:product_slug>/', views.ProductDetail.as_view()),
-
-
 ]

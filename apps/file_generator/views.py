@@ -16,6 +16,9 @@ from datetime import datetime
 from django.templatetags.static import static
 
 
+mainUrl = "127.0.0.1:8000"
+# mainUrl = "0.0.0.0:8000"
+
 @api_view(['POST'])
 def XLSXGen(request):
     query = request.data.get('XLSXdata', '')
@@ -24,22 +27,23 @@ def XLSXGen(request):
     for item in arr:
         res[item] = arr.count(item)
     
-    print(res)
-
+    
     for id,item in  enumerate(res):
         print(id, item, res[item])
     
     if query:
         output = io.BytesIO()
-        workbook = xlsxwriter.Workbook(output)
+        workbook = xlsxwriter.Workbook(output, {'constant_memory': True, 'in_memory': True})
         worksheet = workbook.add_worksheet(f"КП {datetime.today().strftime('%d.%m.%Y')}")
   
+
         logo_url = static('catalog/logo.png')
-        logo_url_data = BytesIO(urlopen(f'http://127.0.0.1:8000/{logo_url}').read())
+        logo_url_data = BytesIO(urlopen(f'http://{mainUrl}{logo_url}').read())
+        worksheet.insert_image(0, 0, 'logo', {'image_data': logo_url_data, 'x_scale': 0.7, 'y_scale': 0.7, 'x_offset': 430, 'y_offset': 10})
+
         first_merge_format = workbook.add_format({'border': 1, 'bottom_color': 'red'})
         worksheet.merge_range('A1:J1', "", first_merge_format)
         worksheet.set_row(0, 70)
-        worksheet.insert_image(0, 0, 'logo', {'image_data': logo_url_data, 'x_scale': 0.7, 'y_scale': 0.7, 'x_offset': 430, 'y_offset': 10})
         bk_kaz_format = {
             'width': 300,
             'height': 70,
@@ -155,11 +159,11 @@ def XLSXGen(request):
             worksheet.set_column(1,1, 25)
             worksheet.set_row(id, 100)
             try:
-                url = product.values_list('title_image', flat = True)[0]
-                image_data = BytesIO(urlopen(f'http://127.0.0.1:8000/media/{url}').read())
+                url = product.values_list('title_image', flat=True)[0]
+                image_data = BytesIO(urlopen(f'http://{mainUrl}/media/{url}').read())
                 worksheet.insert_image(id, 1,'image name', {'image_data': image_data, 'x_scale': 0.1, 'y_scale': 0.1, 'x_offset': 10, 'y_offset': 10, 'object_position': 1})
             except:
-                worksheet.write(id, 1, 'no data')
+                worksheet.write(id, 1, 'Нет данных')
 
             # NAME
             worksheet.set_column(2,2, 23)
@@ -173,9 +177,9 @@ def XLSXGen(request):
                 'size': 11})
             try:
                 name = product.values_list('name',flat = True)[0]
-                worksheet.write(id, 2, f'{name+name}', name_cell_format)
+                worksheet.write(id, 2, f'{name}', name_cell_format)
             except:
-                worksheet.write(id, 2, 'no data', name_cell_format)
+                worksheet.write(id, 2, 'Нет данных', name_cell_format)
 
             # DESCR
             worksheet.set_column(3,3, 30)
@@ -187,10 +191,14 @@ def XLSXGen(request):
                 'font_name': 'Arial', 
                 'size': 11})
             try:
-                descr = product.values_list('description',flat = True)[0]
-                worksheet.write(id, 3, f'{descr}', descr_cell_format)
+                props = product.values_list('properties',flat = True)[0]
+                prop_cell = ''
+                for prop in props:
+                    prop_cell += "\n" + "\n" + prop
+                # descr = product.values_list('description',flat = True)[0]
+                worksheet.write(id, 3, f'{prop_cell}', descr_cell_format)
             except:
-                worksheet.write(id, 3, 'no data', descr_cell_format)
+                worksheet.write(id, 3, 'Нет данных', descr_cell_format)
 
             # CONSUMPTION
             worksheet.set_column(4,4, 6)
@@ -205,7 +213,7 @@ def XLSXGen(request):
                 kwt = product.values_list('consumption',flat = True)[0]
                 worksheet.write(id, 4, kwt, consumption_cell_format)
             except:
-                worksheet.write(id, 4, 'no data', consumption_cell_format)
+                worksheet.write(id, 4, 'Нет данных', consumption_cell_format)
 
 
             # SIZE
@@ -221,7 +229,7 @@ def XLSXGen(request):
                 size = product.values_list('dimensions',flat = True)[0]
                 worksheet.write(id, 5, f'{size}', size_cell_format)
             except:
-                worksheet.write(id, 5, 'no data', size_cell_format)
+                worksheet.write(id, 5, 'Нет данных', size_cell_format)
 
             # COUNT
             worksheet.set_column(6,6, 6)
@@ -314,4 +322,5 @@ def XLSXGen(request):
         return response
     else:
         raise Http404
+
 
