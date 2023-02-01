@@ -158,10 +158,18 @@ def XLSXGen(request):
              # IMAGE
             worksheet.set_column(1,1, 25)
             worksheet.set_row(id, 100)
-            try:
+            try:            
+                image_cell_format = workbook.add_format({
+                    'bold': 1,
+                    'align': 'center',
+                    'valign': 'vcenter',
+                    'border': 1,
+                    'font_name': 'Arial',
+                    'text_wrap': True,
+                    'size': 11})
                 url = product.values_list('title_image', flat=True)[0]
                 image_data = BytesIO(urlopen(f'http://{mainUrl}/media/{url}').read())
-                worksheet.insert_image(id, 1,'image name', {'image_data': image_data, 'x_scale': 0.1, 'y_scale': 0.1, 'x_offset': 10, 'y_offset': 10, 'object_position': 1})
+                worksheet.insert_image(id, 1,'image name', {'image_data': image_data, 'x_scale': 0.09, 'y_scale': 0.09, 'x_offset': 30, 'y_offset': 5, 'object_position': 1,})
             except:
                 worksheet.write(id, 1, 'Нет данных')
 

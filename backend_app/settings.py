@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'apps.products',
     'apps.file_generator.apps',
+    'apps.other_app'
 ]
 
 MIDDLEWARE = [

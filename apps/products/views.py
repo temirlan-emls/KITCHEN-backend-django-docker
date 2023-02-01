@@ -9,6 +9,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 
+import random
 
 class LatestProductsList(APIView):
     def get(self, request, format=None):
@@ -16,6 +17,12 @@ class LatestProductsList(APIView):
         serializer = ProductSerializer(products, many=True, context={"request": request})
         return Response(serializer.data)
 
+class RandomProductsList(APIView):
+    def get(self, request, format=None):
+        products = list(Product.objects.all())
+        random_items = random.sample(products, 7)
+        serializer = ProductSerializer(random_items, many=True, context={"request": request})
+        return Response(serializer.data)
 
 class ProductDetail(APIView):
     def get_object(self, sub_category_slug, product_slug):
