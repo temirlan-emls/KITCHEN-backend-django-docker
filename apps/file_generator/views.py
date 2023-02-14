@@ -16,8 +16,8 @@ from datetime import datetime
 from django.templatetags.static import static
 
 
-# mainUrl = "127.0.0.1:8000"
-mainUrl = "0.0.0.0:8000"
+mainUrl = "127.0.0.1:8000"
+# mainUrl = "0.0.0.0:8000"
 
 @api_view(['POST'])
 def XLSXGen(request):

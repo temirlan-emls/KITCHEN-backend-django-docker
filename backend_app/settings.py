@@ -136,32 +136,15 @@ USE_TZ = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# -----------------PROD
-SECRET_KEY = os.environ.get("SECRET_KEY")
-DEBUG = int(os.environ.get("DEBUG", default=0))
-ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
+SECRET_KEY = 'django-insecure-^4!ro-oo(&8(0ney6we_o$!c-dr=8rt!fhw)!6o^399zc2f7n&'
+DEBUG = 1
 DATABASES = {
     "default": {
-        "ENGINE": os.environ.get("SQL_ENGINE", "django.db.backends.sqlite3"),
-        "NAME": os.environ.get("SQL_DATABASE", BASE_DIR / "db.sqlite3"),
-        "USER": os.environ.get("SQL_USER", "user"),
-        "PASSWORD": os.environ.get("SQL_PASSWORD", "password"),
-        "HOST": os.environ.get("SQL_HOST", "localhost"),
-        "PORT": os.environ.get("SQL_PORT", "5432"),
-        'CONN_MAX_AGE': None,
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'kitchen_DB',
+        'USER': 'kitchen_db_user',
+        'PASSWORD': '12345',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
-
-# -----------------DEV
-# SECRET_KEY = 'django-insecure-^4!ro-oo(&8(0ney6we_o$!c-dr=8rt!fhw)!6o^399zc2f7n&'
-# DEBUG = 1
-# DATABASES = {
-#     "default": {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'kitchen_DB',
-#         'USER': 'kitchen_db_user',
-#         'PASSWORD': '12345',
-#         'HOST': 'localhost',
-#         'PORT': '5432',
-#     }
-# }
