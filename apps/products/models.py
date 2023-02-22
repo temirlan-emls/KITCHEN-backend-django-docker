@@ -1,4 +1,3 @@
-from turtle import title
 from django_better_admin_arrayfield.models.fields import ArrayField
 from io import BytesIO
 from PIL import Image
