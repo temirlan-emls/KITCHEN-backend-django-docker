@@ -137,8 +137,9 @@ USE_TZ = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-SECRET_KEY = 'django-insecure-^4!ro-oo(&8(0ney6we_o$!c-dr=8rt!fhw)!6o^399zc2f7n&'
-DEBUG = 1
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
+DEBUG = False
+ALLOWED_HOSTS = ['*']
 DATABASES = {
     "default": dj_database_url.parse(os.environ.get('DATABASE_URL'))
 }
