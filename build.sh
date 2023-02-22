@@ -2,6 +2,8 @@
 
 set -o errexit  # exit on error
 
+USER root
+
 apt-get install -y python3-tk 
 
 pip install -r requirements.txt
